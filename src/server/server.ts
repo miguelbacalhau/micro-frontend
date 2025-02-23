@@ -1,55 +1,37 @@
 import http from "node:http";
-import url from "node:url";
+
+import { notFoundRoute, registerRoute, rootRoute, Route } from "./routes.js";
 
 export function createServer() {
+  const routes: Route[] = [];
   const services: Record<string, unknown> = {};
 
-  const server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url ?? "", true);
-    const { pathname } = parsedUrl;
+  const server = http.createServer(async (req, res) => {
+    for (const route of routes) {
+      const skipNext = await route({ req, res, services });
 
-    const registerMatch = pathname?.match(/^\/register\/([^/]+)$/);
-
-    console.log(req.method, req.url, registerMatch);
-    if (req.method === "POST" && registerMatch) {
-      let body = "";
-
-      req.on("data", (chunk) => {
-        body += chunk;
-      });
-
-      req.on("end", () => {
-        try {
-          const parsedData = JSON.parse(body);
-          const serviceName = registerMatch[1];
-
-          services[serviceName] = parsedData;
-          // Send a JSON response back
-          res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(
-            JSON.stringify({ message: "Data received", data: parsedData }),
-          );
-        } catch (err) {
-          console.log(err);
-          res.writeHead(400, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: "Invalid JSON" }));
-        }
-      });
-    } else if (req.method === "GET" && req.url === "/") {
-      res.end(JSON.stringify(services));
-    } else {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Not Found" }));
+      if (skipNext) {
+        break;
+      }
     }
   });
 
-  return server;
+  function addRoute(route: Route) {
+    routes.push(route);
+  }
+
+  return { listen: server.listen.bind(server), addRoute };
 }
 
-// Define the port to listen on
+// Start the server
+const server = createServer();
+
+server.addRoute(registerRoute);
+server.addRoute(rootRoute);
+server.addRoute(notFoundRoute);
+
 const PORT = 3000;
 
-// Start the server
-createServer().listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
 });
