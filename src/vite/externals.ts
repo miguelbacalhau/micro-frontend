@@ -1,4 +1,4 @@
-import { UserConfig } from "vite";
+import { ResolvedConfig } from "vite";
 
 /**
  * The esolve id hook guarantees that vite knows how to
@@ -33,7 +33,7 @@ export function externalLoadHook(frontends: string[]) {
  * imports are not overriden by vite
  */
 export function externalConfigResolved(frontends: string[]) {
-  return (resolvedConfig: UserConfig) => {
+  return (resolvedConfig: ResolvedConfig) => {
     // @ts-expect-error resolvedConfig is read-only but we must
     // push the import resolver plugin after vite:import-analysis
     // so we can keep the import without vite altering it
@@ -41,7 +41,7 @@ export function externalConfigResolved(frontends: string[]) {
       name: "micro-fronted:host:import-resolver",
       enforce: "post",
       transform(code: string) {
-        const regex = new RegExp(`@id/(${frontends.join("|")})`);
+        const regex = new RegExp(`/@id/(${frontends.join("|")})`);
 
         code = code.replace(regex, "$1");
 
