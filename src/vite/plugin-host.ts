@@ -1,3 +1,5 @@
+import { Plugin } from "vite";
+
 import { Input } from "./config.js";
 import {
   externalConfigResolved,
@@ -7,7 +9,7 @@ import {
 
 type Config = { input: Input; registerServerUrl: string };
 
-export function microFrontendHost({ input }: Config) {
+export function microFrontendHost({ input }: Config): Plugin {
   const frontends = Object.keys(input);
 
   return {
