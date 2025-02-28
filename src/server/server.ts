@@ -1,10 +1,13 @@
 import http from "node:http";
 
+import { getAvailablePort } from "./availablePort.js";
 import { notFoundRoute, registerRoute, rootRoute, Route } from "./routes.js";
 
+export type Services = Record<string, unknown>;
+
 export function createServer() {
-  const routes: Route[] = [];
-  const services: Record<string, unknown> = {};
+  const routes: Route[] = [registerRoute, rootRoute, notFoundRoute];
+  const services: Services = {};
 
   const server = http.createServer(async (req, res) => {
     for (const route of routes) {
@@ -16,22 +19,17 @@ export function createServer() {
     }
   });
 
-  function addRoute(route: Route) {
-    routes.push(route);
+  function register(name: string, service: unknown) {
+    services[name] = service;
   }
 
-  return { listen: server.listen.bind(server), addRoute };
+  function listen(port?: number) {
+    const nextPort = port || getAvailablePort();
+
+    server.listen(nextPort, () => {
+      console.log(`Server running at http://localhost:${port}/`);
+    });
+  }
+
+  return { listen, register };
 }
-
-// Start the server
-const server = createServer();
-
-server.addRoute(registerRoute);
-server.addRoute(rootRoute);
-server.addRoute(notFoundRoute);
-
-const PORT = 3000;
-
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
-});
