@@ -1,5 +1,6 @@
 import http from "node:http";
 
+import { logError, logMessage } from "../shared/logger.js";
 import { getAvailablePort } from "./availablePort.js";
 import { notFoundRoute, registerRoute, rootRoute, Route } from "./routes.js";
 
@@ -19,6 +20,23 @@ export function createServer() {
     }
   });
 
+  function shutdown() {
+    logMessage("registry", "shutting down");
+
+    server.close((err) => {
+      if (err) {
+        logError("registry", "error during shutdown:", err);
+        process.exit(1);
+      }
+
+      logMessage("registry", "server closed");
+      process.exit(0);
+    });
+  }
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+
   function register(name: string, service: unknown) {
     services[name] = service;
   }
@@ -27,7 +45,7 @@ export function createServer() {
     const nextPort = port || (await getAvailablePort());
 
     server.listen(nextPort, () => {
-      console.log(`Server running at http://localhost:${nextPort}/`);
+      logMessage("registry", `server running at http://localhost:${nextPort}`);
     });
   }
 

@@ -46,7 +46,6 @@ export async function rootRoute({
   res,
   services,
 }: RouteParams): Promise<boolean> {
-  console.log(req.method, req.url);
   if (req.method === "GET" && req.url === "/") {
     res.end(JSON.stringify(services));
 
