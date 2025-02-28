@@ -1,6 +1,7 @@
 import { Plugin } from "vite";
 
 import { createServer } from "../server/server.js";
+import { REGISTER_SERVER_DEV_PORT } from "../shared/constants.js";
 import { devTransforms } from "./dev-transforms.js";
 import { addEntrypoints, Entrypoints } from "./entrypoints.js";
 import { createDevManifest } from "./manifest.js";
@@ -31,7 +32,7 @@ export function microFrontendRemote({ input }: Config): Plugin {
         registerServer.register(name, assets);
       });
 
-      registerServer.listen();
+      registerServer.listen(REGISTER_SERVER_DEV_PORT);
     },
     transform: devTransforms(input, context),
     // generateBundle(_, bundle) {
