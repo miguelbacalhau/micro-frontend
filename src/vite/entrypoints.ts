@@ -1,8 +1,8 @@
 import { UserConfig } from "vite";
 
-export type Input = Record<string, string>;
+export type Entrypoints = Record<string, string>;
 
-export function configHook(input: Input) {
+export function addEntrypoints(input: Entrypoints) {
   return (config: UserConfig) => {
     if (!config.build) {
       config.build = {};

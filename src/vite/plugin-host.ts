@@ -1,13 +1,13 @@
 import { Plugin } from "vite";
 
-import { Input } from "./config.js";
+import { Entrypoints } from "./entrypoints.js";
 import {
   externalConfigResolved,
   externalLoadHook,
   externalResolveIdHook,
 } from "./externals.js";
 
-type Config = { input: Input; registerServerUrl: string };
+type Config = { input: Entrypoints; registerServerUrl: string };
 
 export function microFrontendHost({ input }: Config): Plugin {
   const frontends = Object.keys(input);

@@ -1,27 +1,50 @@
 import { Plugin } from "vite";
 
-import { configHook, Input } from "./config.js";
-import { devTransforms } from "./devTransforms.js";
+import { createServer } from "../server/server.js";
+import { devTransforms } from "./dev-transforms.js";
+import { addEntrypoints, Entrypoints } from "./entrypoints.js";
+import { createDevManifest } from "./manifest.js";
 
-type Config = { input: Input; registerServerUrl: string };
+type Config = { input: Entrypoints; registerServerUrl: string };
 export type PluginContext = { isDev: boolean; devServerUrl: string };
 
 export function microFrontendRemote({ input }: Config): Plugin {
-  const context = {
+  const context: PluginContext = {
     devServerUrl: "",
     isDev: false,
   };
 
   return {
     name: "micro-frontend:remote",
-    config: configHook(input),
+    config: addEntrypoints(input),
     configureServer(server) {
       const host = server.config.server.host || "localhost";
       const port = server.config.server.port;
 
       context.devServerUrl = `${host}:${port}`;
       context.isDev = true;
+
+      const registerServer = createServer();
+      const devManifest = createDevManifest(input, context);
+
+      devManifest.forEach(({ name, assets }) => {
+        registerServer.register(name, assets);
+      });
+
+      registerServer.listen();
     },
     transform: devTransforms(input, context),
+    // generateBundle(_, bundle) {
+    //   const manifest: Record<string, { file: string; imports: string[] }> = {};
+    //   for (const [fileName, chunk] of Object.entries(bundle)) {
+    //     if (chunk.type === "chunk" && chunk.isEntry) {
+    //       console.log("test", chunk);
+    //       manifest[fileName] = {
+    //         file: chunk.fileName,
+    //         imports: chunk.imports || [],
+    //       };
+    //     }
+    //   }
+    // },
   };
 }
