@@ -1,21 +1,27 @@
 import { Plugin } from "vite";
 
-import { Entrypoints } from "./entrypoints.js";
 import {
   externalConfigResolved,
   externalLoadHook,
   externalResolveIdHook,
 } from "./externals.js";
+import { injectImportMaps } from "./inject-importmaps.js";
+import { Assets } from "./manifest.js";
+import { fetchGet } from "./request.js";
 
-type Config = { input: Entrypoints; registerServerUrl: string };
+type Config = { registerServerUrl: string };
 
-export function microFrontendHost({ input }: Config): Plugin {
-  const frontends = Object.keys(input);
+export async function microFrontendHost({
+  registerServerUrl,
+}: Config): Promise<Plugin> {
+  const manifest = await fetchGet<Record<string, Assets>>(registerServerUrl);
+  const frontends = Object.keys(manifest);
 
   return {
     name: "micro-frontend:host",
     resolveId: externalResolveIdHook(frontends),
     load: externalLoadHook(frontends),
     configResolved: externalConfigResolved(frontends),
+    transformIndexHtml: injectImportMaps(manifest),
   };
 }

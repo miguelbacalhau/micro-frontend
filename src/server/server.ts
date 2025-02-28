@@ -23,11 +23,11 @@ export function createServer() {
     services[name] = service;
   }
 
-  function listen(port?: number) {
-    const nextPort = port || getAvailablePort();
+  async function listen(port?: number) {
+    const nextPort = port || (await getAvailablePort());
 
     server.listen(nextPort, () => {
-      console.log(`Server running at http://localhost:${port}/`);
+      console.log(`Server running at http://localhost:${nextPort}/`);
     });
   }
 
