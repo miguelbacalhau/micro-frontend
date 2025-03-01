@@ -29,7 +29,7 @@ export async function registerRoute({
       services[serviceName] = parsedData;
 
       res.writeHead(200, { "Content-Type": "text/plain" });
-      res.end("ok");
+      res.end("Ok");
     } catch {
       res.writeHead(400, { "Content-Type": "text/plain" });
       res.end("Invalid service definition");

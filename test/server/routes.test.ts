@@ -45,7 +45,7 @@ describe("routes", () => {
       expect(res.writeHead).toHaveBeenCalledWith(200, {
         "Content-Type": "text/plain",
       });
-      expect(res.end).toHaveBeenCalledWith("ok");
+      expect(res.end).toHaveBeenCalledWith("Ok");
     });
 
     it("should return 400 on invalid service definition", async () => {

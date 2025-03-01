@@ -49,5 +49,5 @@ export function createServer() {
     });
   }
 
-  return { listen, register };
+  return { listen, register, services };
 }
