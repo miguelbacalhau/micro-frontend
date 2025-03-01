@@ -1,15 +1,8 @@
-import http, { IncomingMessage, ServerResponse } from "node:http";
+import http from "node:http";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createServer } from "../../src/server/server.js";
-
-type SendRequestMock = {
-  sendRequest: (
-    method: "GET" | "POST",
-    url: string,
-  ) => ServerResponse<IncomingMessage>;
-};
 
 vi.mock("node:http", () => {
   const listen = vi.fn();
@@ -45,10 +38,11 @@ describe("createServer", () => {
   });
 
   it("should register a service", () => {
-    const service = {};
-    server.register("testService", service);
+    const frontend = { name: "main", assets: { js: "index.js" } };
 
-    expect(server.services).toMatchObject({ testService: service });
+    server.register("testService", frontend);
+
+    expect(server.frontends).toMatchObject({ "testService:main": frontend });
   });
 
   it("should listen on a specified port", async () => {

@@ -8,13 +8,14 @@ import {
   registerRoute,
   rootRoute,
 } from "../../src/server/routes.js";
+import { MicroFrontend } from "../../src/shared/micro-frontend.js";
 
 vi.mock("../../src/server/parseBody.js");
 
 describe("routes", () => {
   let req: Partial<IncomingMessage>;
   let res: Partial<ServerResponse>;
-  let services: Record<string, unknown>;
+  let frontends: Record<string, MicroFrontend>;
 
   beforeEach(() => {
     req = {
@@ -25,23 +26,29 @@ describe("routes", () => {
       writeHead: vi.fn(),
       end: vi.fn(),
     };
-    services = {};
+    frontends = {};
   });
 
   describe("registerRoute", () => {
     it("should register a service on POST /register/:serviceName", async () => {
       req.method = "POST";
       req.url = "/register/testService";
-      (getRequestBody as Mock).mockResolvedValue({ key: "value" });
+      (getRequestBody as Mock).mockResolvedValue({
+        name: "main",
+        assets: { js: "main.js", css: "styles.css" },
+      });
 
       const result = await registerRoute({
         req: req as IncomingMessage,
         res: res as ServerResponse,
-        services,
+        frontends,
       });
 
       expect(result).toBe(true);
-      expect(services.testService).toEqual({ key: "value" });
+      expect(frontends["testService:main"]).toEqual({
+        name: "main",
+        assets: { js: "main.js", css: "styles.css" },
+      });
       expect(res.writeHead).toHaveBeenCalledWith(200, {
         "Content-Type": "text/plain",
       });
@@ -56,14 +63,14 @@ describe("routes", () => {
       const result = await registerRoute({
         req: req as IncomingMessage,
         res: res as ServerResponse,
-        services,
+        frontends,
       });
 
       expect(result).toBe(true);
       expect(res.writeHead).toHaveBeenCalledWith(400, {
         "Content-Type": "text/plain",
       });
-      expect(res.end).toHaveBeenCalledWith("Invalid service definition");
+      expect(res.end).toHaveBeenCalledWith("Invalid micro-frontend definition");
     });
 
     it("should return false for non-matching routes", async () => {
@@ -73,7 +80,7 @@ describe("routes", () => {
       const result = await registerRoute({
         req: req as IncomingMessage,
         res: res as ServerResponse,
-        services,
+        frontends,
       });
 
       expect(result).toBe(false);
@@ -88,11 +95,11 @@ describe("routes", () => {
       const result = await rootRoute({
         req: req as IncomingMessage,
         res: res as ServerResponse,
-        services,
+        frontends,
       });
 
       expect(result).toBe(true);
-      expect(res.end).toHaveBeenCalledWith(JSON.stringify(services));
+      expect(res.end).toHaveBeenCalledWith(JSON.stringify(frontends));
     });
 
     it("should return false for non-root routes", async () => {
@@ -102,7 +109,7 @@ describe("routes", () => {
       const result = await rootRoute({
         req: req as IncomingMessage,
         res: res as ServerResponse,
-        services,
+        frontends,
       });
 
       expect(result).toBe(false);
@@ -114,7 +121,7 @@ describe("routes", () => {
       const result = await notFoundRoute({
         req: req as IncomingMessage,
         res: res as ServerResponse,
-        services,
+        frontends,
       });
 
       expect(result).toBe(true);

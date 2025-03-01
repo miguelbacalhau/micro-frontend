@@ -1,18 +1,19 @@
 import http from "node:http";
 
 import { logError, logMessage } from "../shared/logger.js";
+import { MicroFrontend } from "../shared/micro-frontend.js";
 import { getAvailablePort } from "./availablePort.js";
 import { notFoundRoute, registerRoute, rootRoute, Route } from "./routes.js";
 
-export type Services = Record<string, unknown>;
+export type MicroFrontends = Record<string, MicroFrontend>;
 
 export function createServer() {
   const routes: Route[] = [registerRoute, rootRoute, notFoundRoute];
-  const services: Services = {};
+  const frontends: MicroFrontends = {};
 
   const server = http.createServer(async (req, res) => {
     for (const route of routes) {
-      const skipNext = await route({ req, res, services });
+      const skipNext = await route({ req, res, frontends });
 
       if (skipNext) {
         break;
@@ -37,8 +38,8 @@ export function createServer() {
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
 
-  function register(name: string, service: unknown) {
-    services[name] = service;
+  function register(name: string, frontend: MicroFrontend) {
+    frontends[`${name}:${frontend.name}`] = frontend;
   }
 
   async function listen(port?: number) {
@@ -49,5 +50,5 @@ export function createServer() {
     });
   }
 
-  return { listen, register, services };
+  return { listen, register, frontends };
 }

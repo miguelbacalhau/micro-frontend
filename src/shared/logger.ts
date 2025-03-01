@@ -34,7 +34,7 @@ function log(type: LogType, source: Source, message: string, error?: Error) {
 
   const logText = `${time} ${header} ${message}`;
 
-  if (error) {
+  if (!error) {
     console.log(logText);
   } else {
     console.log(logText, error);

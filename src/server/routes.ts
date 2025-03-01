@@ -1,12 +1,14 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 import url from "node:url";
 
+import { MicroFrontend } from "../shared/micro-frontend.js";
 import { getRequestBody } from "./parseBody.js";
+import { validateRegister } from "./validation.js";
 
 export type RouteParams = {
   req: IncomingMessage;
   res: ServerResponse<IncomingMessage>;
-  services: Record<string, unknown>;
+  frontends: Record<string, MicroFrontend>;
 };
 
 export type Route = (params: RouteParams) => Promise<boolean>;
@@ -14,7 +16,7 @@ export type Route = (params: RouteParams) => Promise<boolean>;
 export async function registerRoute({
   req,
   res,
-  services,
+  frontends,
 }: RouteParams): Promise<boolean> {
   const parsedUrl = url.parse(req.url ?? "", true);
   const { pathname } = parsedUrl;
@@ -24,15 +26,17 @@ export async function registerRoute({
   if (req.method === "POST" && registerMatch) {
     try {
       const parsedData = await getRequestBody(req);
-      const serviceName = registerMatch[1];
+      const validatedData = validateRegister(parsedData);
 
-      services[serviceName] = parsedData;
+      const name = registerMatch[1];
+
+      frontends[`${name}:${validatedData.name}`] = validatedData;
 
       res.writeHead(200, { "Content-Type": "text/plain" });
       res.end("Ok");
     } catch {
       res.writeHead(400, { "Content-Type": "text/plain" });
-      res.end("Invalid service definition");
+      res.end("Invalid micro-frontend definition");
     }
 
     return true;
@@ -44,10 +48,10 @@ export async function registerRoute({
 export async function rootRoute({
   req,
   res,
-  services,
+  frontends,
 }: RouteParams): Promise<boolean> {
   if (req.method === "GET" && req.url === "/") {
-    res.end(JSON.stringify(services));
+    res.end(JSON.stringify(frontends));
 
     return true;
   }

@@ -6,10 +6,10 @@ import { devTransforms } from "./dev-transforms.js";
 import { addEntrypoints, Entrypoints } from "./entrypoints.js";
 import { createDevManifest } from "./manifest.js";
 
-type Config = { input: Entrypoints; registerServerUrl: string };
+type Config = { input: Entrypoints; registerServerUrl: string; name: string };
 export type PluginContext = { isDev: boolean; devServerUrl: string };
 
-export function microFrontendRemote({ input }: Config): Plugin {
+export function microFrontendRemote({ name, input }: Config): Plugin {
   const context: PluginContext = {
     devServerUrl: "",
     isDev: false,
@@ -28,8 +28,8 @@ export function microFrontendRemote({ input }: Config): Plugin {
       const registerServer = createServer();
       const devManifest = createDevManifest(input, context);
 
-      devManifest.forEach(({ name, assets }) => {
-        registerServer.register(name, assets);
+      devManifest.forEach((frontend) => {
+        registerServer.register(name, frontend);
       });
 
       registerServer.listen(REGISTER_SERVER_DEV_PORT);

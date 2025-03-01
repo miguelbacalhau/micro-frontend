@@ -1,16 +1,14 @@
 import { REGISTER_SERVER_DEV_PORT } from "../shared/constants.js";
 import { logInfo } from "../shared/logger.js";
+import { MicroFrontend } from "../shared/micro-frontend.js";
 import { Entrypoints } from "./entrypoints.js";
 import { PluginContext } from "./plugin-remote.js";
 import { fetchGet } from "./request.js";
 
-export type Assets = { js: string; css?: string };
-export type Manifest = { name: string; assets: Assets };
-
 export function createDevManifest(
   input: Entrypoints,
   context: PluginContext,
-): Manifest[] {
+): MicroFrontend[] {
   return Object.entries(input).map(([name, file]) => {
     const normalizedPath = file.replace(/^(\.\/|\/)/, "");
 
@@ -25,7 +23,7 @@ export async function fetchManifest(registerServerUrl: string) {
   const manifest = {};
 
   try {
-    const devManifest = await fetchGet<Record<string, Assets>>(
+    const devManifest = await fetchGet<Record<string, MicroFrontend>>(
       `http:localhost:${REGISTER_SERVER_DEV_PORT}`,
     );
 
@@ -36,7 +34,7 @@ export async function fetchManifest(registerServerUrl: string) {
 
   try {
     const prodManifest =
-      await fetchGet<Record<string, Assets>>(registerServerUrl);
+      await fetchGet<Record<string, MicroFrontend>>(registerServerUrl);
     Object.assign(manifest, prodManifest);
   } catch {
     logInfo(
