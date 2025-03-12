@@ -7,6 +7,7 @@ import {
 } from "./externals.js";
 import { injectImportMaps } from "./inject-importmaps.js";
 import { fetchManifest } from "./manifest.js";
+import { remoteTransforms } from "./remote-transform.js";
 
 type Config = { registerServerUrl: string };
 
@@ -21,6 +22,7 @@ export async function microFrontendHost({
     resolveId: externalResolveIdHook(frontends),
     load: externalLoadHook(frontends),
     configResolved: externalConfigResolved(frontends),
+    transform: remoteTransforms(),
     transformIndexHtml: injectImportMaps(manifest),
   };
 }

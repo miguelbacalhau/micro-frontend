@@ -8,7 +8,10 @@ import {
   registerRoute,
   rootRoute,
 } from "../../src/server/routes.js";
-import { MicroFrontend } from "../../src/shared/micro-frontend.js";
+import {
+  MicroFrontend,
+  NAME_SEPARATOR,
+} from "../../src/shared/micro-frontend.js";
 
 vi.mock("../../src/server/parseBody.js");
 
@@ -45,7 +48,7 @@ describe("routes", () => {
       });
 
       expect(result).toBe(true);
-      expect(frontends["testService:main"]).toEqual({
+      expect(frontends[`testService${NAME_SEPARATOR}main`]).toEqual({
         name: "main",
         assets: { js: "main.js", css: "styles.css" },
       });

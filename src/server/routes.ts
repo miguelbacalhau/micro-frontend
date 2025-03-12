@@ -1,7 +1,10 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 import url from "node:url";
 
-import { MicroFrontend } from "../shared/micro-frontend.js";
+import {
+  getMicroFrontendName,
+  MicroFrontend,
+} from "../shared/micro-frontend.js";
 import { getRequestBody } from "./parseBody.js";
 import { validateRegister } from "./validation.js";
 
@@ -29,8 +32,9 @@ export async function registerRoute({
       const validatedData = validateRegister(parsedData);
 
       const name = registerMatch[1];
+      const microFrontendName = getMicroFrontendName(name, validatedData.name);
 
-      frontends[`${name}:${validatedData.name}`] = validatedData;
+      frontends[microFrontendName] = validatedData;
 
       res.writeHead(200, { "Content-Type": "text/plain" });
       res.end("Ok");

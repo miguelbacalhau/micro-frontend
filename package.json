@@ -8,7 +8,8 @@
   "type": "module",
   "files": [
     "dist/",
-    "package.json"
+    "package.json",
+    "plugin-host.d.ts"
   ],
   "exports": {
     "./react": {
@@ -18,6 +19,9 @@
     "./vite": {
       "types": "./dist/vite/index.d.ts",
       "import": "./dist/vite/index.js"
+    },
+    "./host": {
+      "types": "./plugin-host.d.ts"
     }
   },
   "scripts": {

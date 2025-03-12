@@ -3,6 +3,7 @@ import http from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createServer } from "../../src/server/server.js";
+import { NAME_SEPARATOR } from "../../src/shared/micro-frontend.js";
 
 vi.mock("node:http", () => {
   const listen = vi.fn();
@@ -42,7 +43,9 @@ describe("createServer", () => {
 
     server.register("testService", frontend);
 
-    expect(server.frontends).toMatchObject({ "testService:main": frontend });
+    expect(server.frontends).toMatchObject({
+      [`testService${NAME_SEPARATOR}main`]: frontend,
+    });
   });
 
   it("should listen on a specified port", async () => {

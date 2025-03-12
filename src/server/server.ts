@@ -1,7 +1,10 @@
 import http from "node:http";
 
 import { logError, logMessage } from "../shared/logger.js";
-import { MicroFrontend } from "../shared/micro-frontend.js";
+import {
+  getMicroFrontendName,
+  MicroFrontend,
+} from "../shared/micro-frontend.js";
 import { getAvailablePort } from "./availablePort.js";
 import { notFoundRoute, registerRoute, rootRoute, Route } from "./routes.js";
 
@@ -39,7 +42,9 @@ export function createServer() {
   process.on("SIGTERM", shutdown);
 
   function register(name: string, frontend: MicroFrontend) {
-    frontends[`${name}:${frontend.name}`] = frontend;
+    const microFrontendName = getMicroFrontendName(name, frontend.name);
+
+    frontends[microFrontendName] = frontend;
   }
 
   async function listen(port?: number) {

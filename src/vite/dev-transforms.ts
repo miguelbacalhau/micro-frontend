@@ -14,8 +14,8 @@ export function devTransforms(input: Entrypoints, context: PluginContext) {
 
       const transformedCode = code.replace(
         importRegex,
-        (_match, imports, module) => {
-          return `const ${imports} = await import('${module}');`;
+        (_match, imports, mod) => {
+          return `const ${imports} = await import('${mod}');`;
         },
       );
 

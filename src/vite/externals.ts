@@ -1,7 +1,7 @@
 import { ResolvedConfig } from "vite";
 
 /**
- * The esolve id hook guarantees that vite knows how to
+ * The resolve id hook guarantees that vite knows how to
  * resolve the imports of the external micro frontends
  */
 export function externalResolveIdHook(frontends: string[]) {
